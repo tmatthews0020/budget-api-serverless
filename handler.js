@@ -7,10 +7,12 @@ const TRANSACTION_TABLE_NAME = "transactions";
 
 module.exports.create = async (event) => {
   return new Promise((resolve, reject) => {
+
     const data = JSON.parse(event.body);
 
     data.id = uuid.v1();
-  
+    data.userId = event.requestContext.authorizer.principalId;
+
     const params = {
       TableName: TRANSACTION_TABLE_NAME,
       Item: data,
@@ -28,7 +30,10 @@ module.exports.create = async (event) => {
 module.exports.list =  async (event) => {
   return new Promise((resolve, reject) => {
     const params = {
-      TableName: TRANSACTION_TABLE_NAME
+      TableName: TRANSACTION_TABLE_NAME,
+      Key: {
+        userId: event.requestContext.authorizer.principalId
+      }
     }
   
     dynamoDb.scan(params, (err, result) => {
