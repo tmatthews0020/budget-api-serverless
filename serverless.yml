@@ -9,6 +9,7 @@ provider:
       Action:
         - "dynamodb:PutItem"
         - "dynamodb:Scan"
+        - "dynamodb:Query"
         - "dynamodb:GetItem"
       Resource: "arn:aws:dynamodb:us-east-1:*:*"
 functions:
@@ -18,24 +19,23 @@ functions:
       - http:
           path: transaction/create
           method: post
-          cors: true
           authorizer: authorizerFunc
+          cors: true
   list:
     handler: handler.list
     events:
       - http:
           path: transaction/list
           method: get
-          cors: true
           authorizer: authorizerFunc
-
+          cors: true
   get:
     handler: handler.get
     events:
       - http:
           path: transaction/{id}
           method: get
-          cors: true
           authorizer: authorizerFunc
+          cors: true
   authorizerFunc:
     handler: authorizer.handler
