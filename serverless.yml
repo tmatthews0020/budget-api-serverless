@@ -14,28 +14,35 @@ provider:
       Resource: "arn:aws:dynamodb:us-east-1:*:*"
 functions:
   create:
-    handler: handler.create
+    handler: ./lib/handler.create
     events:
       - http:
           path: transaction/create
           method: post
-          authorizer: authorizerFunc
+          integration: lambda
+          authorizer:
+            name: authorizer
+            arn: arn:aws:cognito-idp:us-east-1:713776634223:userpool/us-east-1_1LUK6tUjp
           cors: true
   list:
-    handler: handler.list
+    handler: ./lib/handler.list
     events:
       - http:
           path: transaction/list
           method: get
-          authorizer: authorizerFunc
+          integration: lambda
+          authorizer:
+            name: authorizer
+            arn: arn:aws:cognito-idp:us-east-1:713776634223:userpool/us-east-1_1LUK6tUjp
           cors: true
   get:
-    handler: handler.get
+    handler: ./lib/handler.get
     events:
       - http:
           path: transaction/{id}
           method: get
-          authorizer: authorizerFunc
+          integration: lambda
+          authorizer:
+            name: authorizer
+            arn: arn:aws:cognito-idp:us-east-1:713776634223:userpool/us-east-1_1LUK6tUjp
           cors: true
-  authorizerFunc:
-    handler: authorizer.handler
