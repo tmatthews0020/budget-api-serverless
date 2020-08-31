@@ -19,26 +19,15 @@ export const create = (event) => {
       Item: data,
     };
 
-    dynamoDb.put(params, (err, data) => {
-      if (err) {
-        reject({
-          statusCode: err.statusCode || 501,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Credentials": true,
-          },
-          body: "Could not fetch transactions",
-        });
-      }
+    dynamoDb
+      .put(params, (err, data) => {
+        if (err) {
+          reject("Could not fetch transactions");
+        }
 
-      resolve({
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-        },
-        body: data,
-      });
-    });
+        resolve(data);
+      })
+      .promise();
   });
 };
 
@@ -59,14 +48,7 @@ export const list = (event) => {
       console.info(result);
 
       if (err) {
-        reject({
-          statusCode: err.statusCode || 501,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Credentials": true,
-          },
-          body: "Could not fetch transactions",
-        });
+        reject("Could not fetch transactions");
       }
 
       if (!result) {
@@ -75,14 +57,7 @@ export const list = (event) => {
           body: [],
         });
       } else {
-        resolve({
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Credentials": true,
-          },
-          body: JSON.stringify(result.Items),
-        });
+        resolve(result.Items);
       }
     });
   });

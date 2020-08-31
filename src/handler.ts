@@ -7,8 +7,10 @@ import { getCognitoUserId } from "./auth";
 const dynamoDb = new DynamoDB.DocumentClient();
 const TRANSACTION_TABLE_NAME = "transactions";
 
-export const create = (event) => {
+export const create = async (event) => {
   const data = event.body;
+
+  console.log(getCognitoUserId(event));
 
   data.id = uuid.v1();
   data.userId = getCognitoUserId(event);
@@ -18,32 +20,14 @@ export const create = (event) => {
     Item: data,
   };
 
-  dynamoDb.put(params, (err, data) => {
-    console.log(err);
+  await dynamoDb.put(params).promise();
 
-    if (err) {
-      return {
-        statusCode: err.statusCode || 501,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-        },
-        body: "Could not fetch transactions",
-      };
-    }
-
-    return {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
-      },
-      body: data,
-    };
-  });
+  return "Created";
 };
 
-export const list = (event) => {
-  console.log(event);
+export const list = async (event) => {
+  const userId = getCognitoUserId(event);
+  console.log(userId);
 
   const params = {
     TableName: TRANSACTION_TABLE_NAME,
@@ -52,45 +36,16 @@ export const list = (event) => {
       "#userId": "userId",
     },
     ExpressionAttributeValues: {
-      ":userId": { S: getCognitoUserId(event) },
+      ":userId": { S: userId },
     },
   };
 
-  dynamoDb.scan(params, (err, result) => {
-    console.info(result);
-
-    if (err) {
-      console.log(err);
-
-      return {
-        statusCode: err.statusCode || 501,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-        },
-        body: "Could not fetch transactions",
-      };
-    }
-
-    if (!result) {
-      return {
-        statusCode: 200,
-        body: [],
-      };
-    } else {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-        },
-        body: JSON.stringify(result.Items),
-      };
-    }
-  });
+  const resp = await dynamoDb.scan(params).promise();
+  console.log(resp);
+  return resp.Items ? resp.Items : [];
 };
 
-export const get = (event) => {
+export const get = async (event) => {
   const params = {
     TableName: TRANSACTION_TABLE_NAME,
     Key: {
@@ -99,25 +54,7 @@ export const get = (event) => {
     },
   };
 
-  dynamoDb.get(params, (err, result) => {
-    if (err) {
-      console.error(err);
+  const resp = await dynamoDb.get(params).promise();
 
-      return {
-        statusCode: err.statusCode || 501,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-        },
-        body: "Couldn't get transaction",
-      };
-    }
-
-    console.log(result);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify(result.Item),
-    };
-  });
+  return resp.Item;
 };
