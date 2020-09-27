@@ -3,8 +3,11 @@
 import { DynamoDB } from "aws-sdk";
 import * as uuid from "uuid";
 import { getCognitoUserId } from "./auth";
+import { DYNAMODB_API_VERSION } from "./config/api-version";
 
-const dynamoDb = new DynamoDB.DocumentClient();
+const dynamoDb = new DynamoDB.DocumentClient({
+  apiVersion: DYNAMODB_API_VERSION,
+});
 const TRANSACTION_TABLE_NAME = "transactions";
 
 export const create = async (event) => {
@@ -25,7 +28,10 @@ export const create = async (event) => {
   return "Created";
 };
 
-export const list = async (event) => {
+export const list = async (event, context) => {
+  console.log(`event ${JSON.stringify(event)}`);
+  console.log(`context ${JSON.stringify(context)}`);
+
   const userId = getCognitoUserId(event);
   console.log(userId);
 
@@ -36,20 +42,26 @@ export const list = async (event) => {
       "#userId": "userId",
     },
     ExpressionAttributeValues: {
-      ":userId": { S: userId },
+      ":userId": userId,
     },
   };
-
-  const resp = await dynamoDb.scan(params).promise();
-  console.log(resp);
-  return resp.Items ? resp.Items : [];
+  try {
+    const resp = await dynamoDb.scan(params).promise();
+    console.log(resp);
+    return resp.Items ? resp.Items : [];
+  } catch (err) {
+    console.error(err);
+    return;
+  }
 };
 
 export const get = async (event) => {
+  console.log(event);
+
   const params = {
     TableName: TRANSACTION_TABLE_NAME,
     Key: {
-      id: event.pathParameters.id,
+      id: event.path.id,
       userId: getCognitoUserId(event),
     },
   };

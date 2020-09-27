@@ -3,19 +3,22 @@
 import { DynamoDB } from "aws-sdk";
 import * as uuid from "uuid";
 import { getCognitoUserId } from "./auth";
-const dynamoDb = new DynamoDB.DocumentClient();
-const TRANSACTION_TABLE_NAME = "categories";
+import { DYNAMODB_API_VERSION } from "./config/api-version";
+
+const dynamoDb = new DynamoDB.DocumentClient({
+  apiVersion: DYNAMODB_API_VERSION,
+});
+const CATEGORIES_TABLE_NAME = "categories";
 
 export const create = (event) => {
   return new Promise((resolve, reject) => {
     const data = JSON.parse(event.body);
-    data.userId = getCognitoUserId(event);
 
+    data.userId = getCognitoUserId(event);
     data.id = uuid.v1();
-    data.userId = event.requestContext.authorizer.principalId;
 
     const params = {
-      TableName: TRANSACTION_TABLE_NAME,
+      TableName: CATEGORIES_TABLE_NAME,
       Item: data,
     };
 
@@ -34,13 +37,13 @@ export const create = (event) => {
 export const list = (event) => {
   return new Promise((resolve, reject) => {
     const params = {
-      TableName: TRANSACTION_TABLE_NAME,
+      TableName: CATEGORIES_TABLE_NAME,
       FilterExpression: "#userId = :userId",
       ExpressionAttributeNames: {
         "#userId": "userId",
       },
       ExpressionAttributeValues: {
-        ":userId": { S: getCognitoUserId(event) },
+        ":userId": getCognitoUserId(event),
       },
     };
 
@@ -48,7 +51,7 @@ export const list = (event) => {
       console.info(result);
 
       if (err) {
-        reject("Could not fetch transactions");
+        reject("Could get categories");
       }
 
       if (!result) {
