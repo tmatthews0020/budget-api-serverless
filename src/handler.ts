@@ -3,10 +3,10 @@
 import { DynamoDB } from "aws-sdk";
 import * as uuid from "uuid";
 import { getCognitoUserId } from "./auth";
-import { DYNAMODB_API_VERSION } from "./config/api-version";
+import { config } from "./config/config";
 
 const dynamoDb = new DynamoDB.DocumentClient({
-  apiVersion: DYNAMODB_API_VERSION,
+  apiVersion: config.apiVersions.dynamodb,
 });
 const TRANSACTION_TABLE_NAME = "transactions";
 

@@ -1,5 +1,3 @@
-import { Kinesis } from "aws-sdk";
-
 export const config = {
   apiVersions: {
     dynamodb: "2012-08-10",

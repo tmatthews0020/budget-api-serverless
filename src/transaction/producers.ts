@@ -1,5 +1,5 @@
 import AWS from "aws-sdk";
-import { config } from "../config/api-version";
+import { config } from "../config/config";
 import { Transaction } from "./transaction.interface";
 
 const kinesis = new AWS.Kinesis({

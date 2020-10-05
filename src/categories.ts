@@ -3,65 +3,39 @@
 import { DynamoDB } from "aws-sdk";
 import * as uuid from "uuid";
 import { getCognitoUserId } from "./auth";
-import { DYNAMODB_API_VERSION } from "./config/api-version";
+import { config } from "./config/config";
 
 const dynamoDb = new DynamoDB.DocumentClient({
-  apiVersion: DYNAMODB_API_VERSION,
+  apiVersion: config.apiVersions.dynamodb,
 });
 const CATEGORIES_TABLE_NAME = "categories";
 
-export const create = (event) => {
-  return new Promise((resolve, reject) => {
-    const data = JSON.parse(event.body);
+export const create = async (event) => {
+  const data = event.body;
 
-    data.userId = getCognitoUserId(event);
-    data.id = uuid.v1();
+  data.userId = getCognitoUserId(event);
+  data.id = uuid.v1();
 
-    const params = {
-      TableName: CATEGORIES_TABLE_NAME,
-      Item: data,
-    };
-
-    dynamoDb
-      .put(params, (err, data) => {
-        if (err) {
-          reject("Could not fetch transactions");
-        }
-
-        resolve(data);
-      })
-      .promise();
-  });
+  const params = {
+    TableName: CATEGORIES_TABLE_NAME,
+    Item: data,
+  };
+  await dynamoDb.put(params).promise();
 };
 
-export const list = (event) => {
-  return new Promise((resolve, reject) => {
-    const params = {
-      TableName: CATEGORIES_TABLE_NAME,
-      FilterExpression: "#userId = :userId",
-      ExpressionAttributeNames: {
-        "#userId": "userId",
-      },
-      ExpressionAttributeValues: {
-        ":userId": getCognitoUserId(event),
-      },
-    };
+export const list = async (event) => {
+  const params = {
+    TableName: CATEGORIES_TABLE_NAME,
+    FilterExpression: "#userId = :userId",
+    ExpressionAttributeNames: {
+      "#userId": "userId",
+    },
+    ExpressionAttributeValues: {
+      ":userId": getCognitoUserId(event),
+    },
+  };
 
-    dynamoDb.scan(params, (err, result) => {
-      console.info(result);
+  const result = await dynamoDb.scan(params).promise();
 
-      if (err) {
-        reject("Could get categories");
-      }
-
-      if (!result) {
-        resolve({
-          statusCode: 200,
-          body: [],
-        });
-      } else {
-        resolve(result.Items);
-      }
-    });
-  });
+  return result.Items ? result.Items : [];
 };
