@@ -31,6 +31,6 @@ const transactionRepository = new TransactionRepository();
 const transactionService = new TransactionService(transactionRepository);
 const transactionHandler = new TransactionHandler(transactionService);
 
-export const create = transactionHandler.create;
-export const list = transactionHandler.list;
-export const get = transactionHandler.get;
+export const create = transactionHandler.create.bind(transactionHandler);
+export const list = transactionHandler.list.bind(transactionHandler);
+export const get = transactionHandler.get.bind(transactionHandler);

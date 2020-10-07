@@ -1,4 +1,4 @@
-service: serverless
+service: transaction
 provider:
   name: aws
   runtime: nodejs12.x
@@ -14,7 +14,7 @@ provider:
       Resource: "arn:aws:dynamodb:us-east-1:*:*"
 functions:
   create:
-    handler: ./lib/handler.create
+    handler: ./lib/transaction/handler.create
     events:
       - http:
           path: transaction/create
@@ -25,7 +25,7 @@ functions:
             arn: arn:aws:cognito-idp:us-east-1:713776634223:userpool/us-east-1_1LUK6tUjp
           cors: true
   list:
-    handler: ./lib/handler.list
+    handler: ./lib/transaction/handler.list
     events:
       - http:
           path: transaction/list
