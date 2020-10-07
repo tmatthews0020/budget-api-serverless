@@ -4,8 +4,10 @@
   "description": "",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "test": "jest",
+    "build": "tsc",
+    "deploy-category": "serverless deploy --config ./src/category/serverless.yml",
+    "deploy-transaction": "serverless deploy --config ./src/transaction/serverless.yml"
   },
   "author": "",
   "license": "ISC",
@@ -19,5 +21,8 @@
     "jwk-to-pem": "1.2.5",
     "request": "2.72.0",
     "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "jest": "^26.5.2"
   }
 }

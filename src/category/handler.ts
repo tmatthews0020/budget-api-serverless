@@ -2,8 +2,8 @@
 
 import { DynamoDB } from "aws-sdk";
 import * as uuid from "uuid";
-import { getCognitoUserId } from "./auth";
-import { config } from "./config/config";
+import { getCognitoUserId } from "../auth";
+import { config } from "../config/config";
 
 const dynamoDb = new DynamoDB.DocumentClient({
   apiVersion: config.apiVersions.dynamodb,

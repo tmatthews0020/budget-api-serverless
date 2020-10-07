@@ -13,28 +13,6 @@ provider:
         - "dynamodb:GetItem"
       Resource: "arn:aws:dynamodb:us-east-1:*:*"
 functions:
-  create-category:
-    handler: ./lib/categories.create
-    events:
-      - http:
-          path: category/create
-          method: post
-          integration: lambda
-          authorizer:
-            name: authorizer
-            arn: arn:aws:cognito-idp:us-east-1:713776634223:userpool/us-east-1_1LUK6tUjp
-          cors: true
-  list-categories:
-    handler: ./lib/categories.list
-    events:
-      - http:
-          path: category/list
-          method: get
-          integration: lambda
-          authorizer:
-            name: authorizer
-            arn: arn:aws:cognito-idp:us-east-1:713776634223:userpool/us-east-1_1LUK6tUjp
-          cors: true
   create:
     handler: ./lib/handler.create
     events:
