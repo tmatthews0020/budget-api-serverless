@@ -1,41 +1,30 @@
-"use strict";
-
-import { DynamoDB } from "aws-sdk";
 import * as uuid from "uuid";
 import { getCognitoUserId } from "../auth";
-import { config } from "../config/config";
+import { Category } from "./category.interface";
+import { CategoryRepository } from "./category.repository";
+import { CategoryService } from "./category.service";
 
-const dynamoDb = new DynamoDB.DocumentClient({
-  apiVersion: config.apiVersions.dynamodb,
-});
-const CATEGORIES_TABLE_NAME = "categories";
+export class CategoryHandler {
+  constructor(private readonly categoryService: CategoryService) {}
 
-export const create = async (event) => {
-  const data = event.body;
+  async create(event: any) {
+    const category = new Category({
+      id: uuid.v1(),
+      categoryName: event.body.categoryName,
+      userId: getCognitoUserId(event),
+    });
 
-  data.userId = getCognitoUserId(event);
-  data.id = uuid.v1();
+    return this.categoryService.create(category);
+  }
 
-  const params = {
-    TableName: CATEGORIES_TABLE_NAME,
-    Item: data,
-  };
-  await dynamoDb.put(params).promise();
-};
+  async list(event: any) {
+    return this.categoryService.list(getCognitoUserId(event));
+  }
+}
 
-export const list = async (event) => {
-  const params = {
-    TableName: CATEGORIES_TABLE_NAME,
-    FilterExpression: "#userId = :userId",
-    ExpressionAttributeNames: {
-      "#userId": "userId",
-    },
-    ExpressionAttributeValues: {
-      ":userId": getCognitoUserId(event),
-    },
-  };
+const categoryRepository = new CategoryRepository();
+const categoryService = new CategoryService(categoryRepository);
+const categoryHandler = new CategoryHandler(categoryService);
 
-  const result = await dynamoDb.scan(params).promise();
-
-  return result.Items ? result.Items : [];
-};
+export const create = categoryHandler.create.bind(categoryHandler);
+export const list = categoryHandler.list.bind(categoryHandler);
