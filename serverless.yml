@@ -1,0 +1,45 @@
+service: budgetAPI
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+resources: # CloudFormation template syntax
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: transactions-${opt:stage, 'dev'}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: amount
+            AttributeType: N
+          - AttributeName: currency
+            AttributeType: S
+          - AttributeName: category
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    categoriesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: categories-${opt:stage, 'dev'}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: categoryName
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
